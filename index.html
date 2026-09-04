@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduPortal — Online Examination & LMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>EduPortal</h1>
+      <p>Online Examination & Learning Management</p>
+    </div>
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="switchLoginRole('student', this)">Student</button>
+      <button class="login-tab" onclick="switchLoginRole('teacher', this)">Teacher</button>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="Enter your email">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; font-size:14px;" onclick="doLogin()">Sign In</button>
+    <div class="divider"></div>
+    <p style="font-size:12px; color:var(--text3); text-align:center; margin-bottom:12px;">Quick Login — Demo Accounts</p>
+    <div class="quick-login-grid" id="quickLoginGrid">
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <h1>EduPortal</h1>
+    <span>Learning Management System</span>
+  </div>
+  <div class="nav-section" id="navMenu"></div>
+  <div class="sidebar-user">
+    <div class="avatar" id="sidebarAvatar"></div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name" id="sidebarName"></div>
+      <div class="sidebar-user-role" id="sidebarRole"></div>
+    </div>
+    <button class="switch-btn" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<main class="main" id="main">
+
+  <div class="panel" id="panel-dashboard">
+    <div class="page-header">
+      <div class="breadcrumb">Home → <span>Dashboard</span></div>
+      <h2 id="dashGreeting"></h2>
+      <p id="dashSubtitle"></p>
+    </div>
+    <div class="grid-4" id="dashStats"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-header">
+          <span class="section-title">My Courses</span>
+          <button class="btn btn-ghost btn-sm" onclick="navigate('courses')">View All</button>
+        </div>
+        <div id="dashCourseList"></div>
+      </div>
+      <div class="card">
+        <div class="section-header">
+          <span class="section-title">Recent Activity</span>
+        </div>
+        <div class="timeline" id="activityTimeline"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-header">
+        <span class="section-title">Upcoming Exams</span>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('exams')">All Exams</button>
+      </div>
+      <table>
+        <thead><tr><th>Exam</th><th>Course</th><th>Date</th><th>Duration</th><th>Status</th><th></th></tr></thead>
+        <tbody id="dashExamTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-courses">
+    <div class="page-header">
+      <div class="breadcrumb">Home → <span>Courses</span></div>
+      <h2>My Courses</h2>
+      <p>Enrolled subjects and learning materials</p>
+    </div>
+    <div class="grid-3" id="courseCardGrid"></div>
+    <div class="card" id="materialSection">
+      <div class="section-header">
+        <span class="section-title">Learning Materials</span>
+      </div>
+      <table>
+        <thead><tr><th>Title</th><th>Course</th><th>Type</th><th>Upload Date</th><th></th></tr></thead>
+        <tbody id="materialTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-exams">
+    <div class="page-header">
+      <div class="breadcrumb">Home → <span>Exams</span></div>
+      <h2>Examinations</h2>
+      <p>Scheduled and available tests</p>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchExamTab('available', this)">Available</div>
+      <div class="tab" onclick="switchExamTab('upcoming', this)">Upcoming</div>
+      <div class="tab" onclick="switchExamTab('completed', this)">Completed</div>
+    </div>
+    <div id="examList"></div>
+  </div>
+
+  <div class="panel" id="panel-take-exam">
+    <div class="exam-header">
+      <div>
+        <div class="section-title" id="examTitle"></div>
+        <div class="text-sm mt-4" id="examMeta"></div>
+      </div>
+      <div>
+        <div class="text-sm mb-8" style="text-align:center">Time Remaining</div>
+        <div class="timer" id="examTimer">45:00</div>
+      </div>
+      <div>
+        <div class="text-sm mb-8">Questions</div>
+        <div class="q-nav" id="qNav"></div>
+      </div>
+      <button class="btn btn-danger" onclick="submitExam()">Submit Exam</button>
+    </div>
+    <div id="examQuestions"></div>
+    <div style="text-align:center; padding:20px;">
+      <button class="btn btn-primary" onclick="submitExam()" style="padding:12px 32px;">Submit & View Results</button>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-results">
+    <div class="page-header">
+      <div class="breadcrumb">Home → <span>Results</span></div>
+      <h2>My Results</h2>
+      <p>Exam scores and performance analysis</p>
+    </div>
+    <div class="grid-4" id="resultStats"></div>
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-header"><span class="section-title">Performance by Subject</span></div>
+      <div id="subjectPerformance"></div>
+    </div>
+    <div class="card">
+      <div class="section-header"><span class="section-title">Exam History</span></div>
+      <table>
+        <thead><tr><th>Exam</th><th>Course</th><th>Date</th><th>Score</th><th>Grade</th><th>Status</th></tr></thead>
+        <tbody id="resultHistoryTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-profile">
+    <div class="page-header">
+      <div class="breadcrumb">Home → <span>Profile</span></div>
+      <h2>My Profile</h2>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-title" style="margin-bottom:20px;">Personal Information</div>
+        <div id="profileInfo"></div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:20px;">Academic Summary</div>
+        <div id="academicSummary"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-t-dashboard">
+    <div class="page-header">
+      <div class="breadcrumb">Home → <span>Dashboard</span></div>
+      <h2 id="tDashGreeting"></h2>
+      <p>Manage your courses and students</p>
+    </div>
+    <div class="grid-4" id="tDashStats"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-header">
+          <span class="section-title">Student Performance</span>
+        </div>
+        <div id="studentPerfChart"></div>
+      </div>
+      <div class="card">
+        <div class="section-header"><span class="section-title">Recent Submissions</span></div>
+        <div id="recentSubmissions"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-t-courses">
+    <div class="page-header">
+      <div class="breadcrumb">Teacher → <span>Courses</span></div>
+      <h2>Manage Courses</h2>
+    </div>
+    <div class="section-header">
+      <div></div>
+      <button class="btn btn-primary" onclick="openModal('createCourseModal')">+ New Course</button>
+    </div>
+    <div class="grid-3" id="teacherCourseGrid"></div>
+  </div>
+
+  <div class="panel" id="panel-t-questions">
+    <div class="page-header">
+      <div class="breadcrumb">Teacher → <span>Question Bank</span></div>
+      <h2>Question Bank</h2>
+      <p>Manage MCQ, True/False, and descriptive questions</p>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchQTab('all', this)">All Questions</div>
+      <div class="tab" onclick="switchQTab('MCQ', this)">MCQ</div>
+      <div class="tab" onclick="switchQTab('TrueFalse', this)">True/False</div>
+      <div class="tab" onclick="switchQTab('Descriptive', this)">Descriptive</div>
+    </div>
+    <div class="section-header" style="margin-bottom:16px;">
+      <select id="subjectFilter" style="width:200px;" onchange="renderQuestions()">
+        <option value="all">All Subjects</option>
+      </select>
+      <button class="btn btn-primary" onclick="openModal('addQModal')">+ Add Question</button>
+    </div>
+    <div id="questionList"></div>
+  </div>
+
+  <div class="panel" id="panel-t-exams">
+    <div class="page-header">
+      <div class="breadcrumb">Teacher → <span>Examinations</span></div>
+      <h2>Manage Exams</h2>
+    </div>
+    <div class="section-header">
+      <div></div>
+      <button class="btn btn-primary" onclick="openModal('createExamModal')">+ Schedule Exam</button>
+    </div>
+    <div id="teacherExamList"></div>
+  </div>
+
+  <div class="panel" id="panel-t-students">
+    <div class="page-header">
+      <div class="breadcrumb">Teacher → <span>Students</span></div>
+      <h2>Student Management</h2>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Student</th><th>Roll No.</th><th>Avg Score</th><th>Courses</th><th>Grade</th><th>Status</th></tr></thead>
+        <tbody id="studentTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-t-reports">
+    <div class="page-header">
+      <div class="breadcrumb">Teacher → <span>Reports</span></div>
+      <h2>Performance Reports</h2>
+    </div>
+    <div class="grid-4" id="reportStats"></div>
+    <div class="card">
+      <div class="section-header">
+        <span class="section-title">All Student Results</span>
+        <button class="btn btn-secondary btn-sm" onclick="exportCSV()">↓ Export CSV</button>
+      </div>
+      <table>
+        <thead><tr><th>Student</th><th>Exam</th><th>Course</th><th>Score</th><th>Grade</th><th>Date</th></tr></thead>
+        <tbody id="fullResultTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<div class="modal-backdrop" id="addQModal">
+  <div class="modal">
+    <div class="modal-title">Add Question</div>
+    <div class="form-group">
+      <label>Question Type</label>
+      <select id="qType" onchange="renderQTypeFields()">
+        <option value="MCQ">Multiple Choice (MCQ)</option>
+        <option value="TrueFalse">True / False</option>
+        <option value="Descriptive">Descriptive</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Subject</label>
+      <select id="qSubject">
+        <option value="Data Structures">Data Structures</option>
+        <option value="Python Programming">Python Programming</option>
+        <option value="DBMS">DBMS</option>
+        <option value="Operating Systems">Operating Systems</option>
+        <option value="Computer Networks">Computer Networks</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Question Text</label>
+      <textarea id="qText" rows="3" placeholder="Enter the question..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Marks</label>
+      <input type="number" id="qMarks" value="2" min="1" max="10">
+    </div>
+    <div id="qTypeFields"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addQModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveQuestion()">Save Question</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="createExamModal">
+  <div class="modal">
+    <div class="modal-title">Schedule New Exam</div>
+    <div class="form-group">
+      <label>Exam Title</label>
+      <input type="text" id="newExamTitle" placeholder="e.g. Mid-Term Examination">
+    </div>
+    <div class="form-group">
+      <label>Course</label>
+      <select id="newExamCourse"></select>
+    </div>
+    <div class="form-group">
+      <label>Date</label>
+      <input type="text" id="newExamDate" placeholder="e.g. 2025-07-15">
+    </div>
+    <div class="form-group">
+      <label>Duration (minutes)</label>
+      <input type="number" id="newExamDuration" value="60">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('createExamModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveExam()">Create Exam</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="createCourseModal">
+  <div class="modal">
+    <div class="modal-title">Create New Course</div>
+    <div class="form-group">
+      <label>Course Name</label>
+      <input type="text" id="newCourseName" placeholder="e.g. Advanced Python">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="newCourseDesc" placeholder="Brief course description..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('createCourseModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCourse()">Create Course</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="examResultModal">
+  <div class="modal" style="text-align:center;">
+    <div class="modal-title" style="text-align:center;">Exam Submitted!</div>
+    <div id="examResultContent"></div>
+    <div class="modal-footer" style="justify-content:center;">
+      <button class="btn btn-primary" onclick="closeModal('examResultModal'); navigate('results')">View Results</button>
+      <button class="btn btn-secondary" onclick="closeModal('examResultModal'); navigate('exams')">Back to Exams</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
